@@ -2,7 +2,7 @@ import { Controller, Get, Req, Res } from '@nestjs/common';
 import { Request, Response } from 'express';
 import { ApiTags, ApiOperation, ApiResponse, ApiCookieAuth } from '@nestjs/swagger';
 import { AppService } from './app.service';
-import { SetCookieResponseDto, GetCookieResponseDto } from './dto/cookie-response.dto';
+import { GetCookieResponseDto } from './dto/cookie-response.dto';
 
 @ApiTags('Cookies')
 @Controller()
@@ -16,26 +16,6 @@ export class AppController {
     return this.appService.getHello();
   }
 
-  @ApiOperation({ summary: 'Set HTTP-only secure cookie' })
-  @ApiResponse({ 
-    status: 200, 
-    description: 'Sets an HTTP-only secure cookie and returns success message',
-    type: SetCookieResponseDto
-  })
-  @Get('set-cookie')
-  setCookie(@Res() response: Response) {
-    // Set an HTTP-only secure cookie that can't be accessed by JavaScript
-    response.cookie('secretToken', 'very-secure-value', {
-      httpOnly: true,
-      secure: true, // Requires HTTPS in production
-      sameSite: 'none', // Needed for cross-domain requests
-      maxAge: 24 * 60 * 60 * 1000, // 24 hours
-      signed: true, // Sign the cookie using the secret from cookieParser
-    });
-
-    return response.json({ success: true, message: 'Cookie set successfully' });
-  }
-
   @ApiCookieAuth('secretToken')
   @ApiOperation({ summary: 'Get HTTP-only secure cookie' })
   @ApiResponse({ 
@@ -44,16 +24,18 @@ export class AppController {
     type: GetCookieResponseDto
   })
   @Get('get-cookie')
-  getCookie(@Req() request: Request): GetCookieResponseDto {
-    // Access the signed cookie (request.signedCookies)
-    const secretToken = request.signedCookies.secretToken;
+  getCookie(@Req() request: Request, @Res() response: Response) {
+    // Access the cookie from the request
+    const secretToken = request.cookies.secretToken;
     
-    console.log('Received HTTP-only secure cookie:', secretToken);
+    console.log('Received HTTP-only secure cookie from frontend:', secretToken);
+    console.log('All cookies:', request.cookies);
     
-    return { 
+    // Return the cookie value in the response
+    return response.json({ 
       success: true, 
       cookieReceived: !!secretToken,
-      cookieValue: secretToken 
-    };
+      cookieValue: secretToken || 'No cookie found'
+    });
   }
 }

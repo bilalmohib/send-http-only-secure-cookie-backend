@@ -1,19 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
 
-export class SetCookieResponseDto {
-  @ApiProperty({
-    description: 'Indicates if the operation was successful',
-    example: true
-  })
-  success: boolean;
-
-  @ApiProperty({
-    description: 'A message describing the result of the operation',
-    example: 'Cookie set successfully'
-  })
-  message: string;
-}
-
 export class GetCookieResponseDto {
   @ApiProperty({
     description: 'Indicates if the operation was successful',
@@ -29,7 +15,7 @@ export class GetCookieResponseDto {
 
   @ApiProperty({
     description: 'The value of the cookie',
-    example: 'very-secure-value'
+    example: 'secure-value-2023-07-20T12:34:56.789Z'
   })
   cookieValue: string;
 } 
